@@ -1,3 +1,4 @@
+"""Coneccion con Base de Datos SQLite"""
 import sqlite3
 from pathlib import Path
 

@@ -1,4 +1,5 @@
-from connection import get_connection
+"""Este archivo es para las Operaciones CRUD: Localidades"""
+from database.connection import get_connection
 
 
 # ==========================================
@@ -151,39 +152,3 @@ def eliminar_paciente(paciente_id):
         cursor.execute(sql, (paciente_id,))
         conn.commit()
         return cursor.rowcount > 0
-
-# ==========================================
-# VERIFICACIÓN DEL MODULO
-# ==========================================
-
-if __name__ == "__main__":
-    print("Módulo db_manager.py cargado correctamente. Listo para recibir operaciones.")
-    
-"""
-# ==========================================
-# PRUEBA RÁPIDA DE LAS FUNCIONES CRUD
-# ==========================================
-
-    # 1. Creamos una localidad de prueba
-    id_loc = crear_localidad("San Gabriel", "Plaza Principal", "2026-11-01", "2026-11-05", 5000.0)
-    print(f"Localidad creada con ID: {id_loc}")
-    
-    # 2. Registramos un paciente en esa localidad
-    id_pac = crear_paciente(
-        localidad_id=id_loc,
-        nombre="Juan Pérez",
-        telefono="3312345678",
-        edad=45,
-        graduacion_od="+0.50",
-        graduacion_oi="+0.75",
-        presvicia="+1.50",
-        observaciones="Lectura de cerca"
-    )
-    print(f"Paciente creado con ID: {id_pac}")
-    
-    # 3. Consultamos los datos ingresados
-    pacientes = obtener_pacientes_por_localidad(id_loc)
-    print(f"\nPacientes encontrados en la localidad {id_loc}:")
-    for p in pacientes:
-        print(f"- [{p['id']}] {p['nombre']} | OD: {p['graduacion_od']} | OI: {p['graduacion_oi']} | ADD: {p['presvicia']} | NOTA: {p['observaciones']}")
-        """
