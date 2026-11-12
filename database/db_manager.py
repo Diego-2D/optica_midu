@@ -104,6 +104,30 @@ def crear_paciente(localidad_id, nombre, telefono="", edad=None, graduacion_od="
 # LEER PACIENTES
 # ==========================================
 
+def obtener_pacientes():
+    """Devuelve todos los pacientes  de todas las localidades."""
+    sql = """
+    SELECT 
+        id,
+        localidad_id,
+        nombre,
+        telefono,
+        edad,
+        graduacion_od,
+        graduacion_oi,
+        presbicia,
+        observaciones
+
+    FROM pacientes
+    ORDER BY nombre ASC;
+    """
+
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        return cursor.fetchall()
+
+
 def obtener_pacientes_por_localidad(localidad_id):
     """Devuelve todos los pacientes atendidos en una localidad específica."""
     sql = "SELECT * FROM pacientes WHERE localidad_id = ? ORDER BY nombre ASC"
@@ -111,6 +135,51 @@ def obtener_pacientes_por_localidad(localidad_id):
         cursor = conn.cursor()
         cursor.execute(sql, (localidad_id,))
         return cursor.fetchall()
+
+
+def obtener_pacientes_por_id(paciente_id):
+    """Devuelve el expediente clinico de un paciente unico por su ID."""
+    sql = """
+    SELECT
+        id,
+        localidad_id,
+        nombre,
+        telefono,
+        edad,
+        graduacion_od,
+        graduacion_oi,
+        presbicia,
+        observaciones
+    FROM pacientes
+    WHERE id = ?;
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (paciente_id,))
+        return cursor.fetchall()
+
+def obtener_pacientes_por_nombre(texto_busqueda):
+    """Devuelve el expediente clinico de un paciente unico por su nombre."""
+    sql = """
+    SELECT
+        id,
+        localidad_id,
+        nombre,
+        telefono,
+        edad,
+        graduacion_od,
+        graduacion_oi,
+        presbicia,
+        observaciones
+    FROM pacientes
+    WHERE nombre LIKE ?
+    ORDER BY nombre ASC;
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (f"%{texto_busqueda}",))
+        return cursor.fetchall()
+
 
 
 # ==========================================
