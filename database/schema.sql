@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS localidades (
     fecha_inicio DATE,
     fecha_fin DATE,
     presupuesto REAL DEFAULT 0.0,
-    estado TEXT DEFAULT 'Planificada'
+    estado TEXT DEFAULT 'Activa'
 );
 
 -- TABLA DE PACIENTES (Registro clínico y graduación)
@@ -20,18 +20,36 @@ CREATE TABLE IF NOT EXISTS pacientes (
     graduacion_oi TEXT,
     presbicia TEXT,
     observaciones TEXT,
-    FOREIGN KEY (localidad_id) REFERENCES localidades (id)
-);
+    FOREIGN KEY (localidad_id) REFERENCES localidades (id) ON DELETE SET NULL
+    );
 
--- TABLA DE VENTAS Y COBRANZA (Control financiero)
+    -- TABLA DE VENTAS Y COBRANZA (Control financiero)
 CREATE TABLE IF NOT EXISTS ventas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     paciente_id INTEGER NOT NULL,
+    tipo_lente TEXT,
+    tratamiento TEXT,
+    diseno_progresivo TEXT,
+    calidad_armazon TEXT,
     total REAL NOT NULL,
     anticipo REAL DEFAULT 0.0,
     saldo_pendiente REAL NOT NULL,
     estatus_pago TEXT DEFAULT 'Pendiente',
     estatus_entrega TEXT DEFAULT 'En Proceso',
     fecha_venta DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (paciente_id) REFERENCES pacientes (id)
+    FOREIGN KEY (paciente_id) REFERENCES pacientes (id) ON DELETE CASCADE
+);
+
+    -- TABLA DE CIERRES DE RUTA (Resumen financiero operativo)
+CREATE TABLE IF NOT EXISTS cierres_ruta (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    localidad_id INTEGER,
+    fecha TEXT NOT NULL,
+    total_venta REAL DEFAULT 0.0,
+    gastos_viaticos REAL DEFAULT 0.0,
+    gastos_materiales REAL DEFAULT 0.0,
+    gastos_armazones REAL DEFAULT 0.0,
+    gastos_maquilas REAL DEFAULT 0.0,
+    gastos_accesorios REAL DEFAULT 0.0,
+    FOREIGN KEY (localidad_id) REFERENCES localidades (id) ON DELETE SET NULL
 );

@@ -16,3 +16,15 @@ from controllers.pacientes_controller import (
     modificar_paciente,
     borrar_paciente
 )
+
+from controllers.ventas_controller import (
+    registrar_venta,
+    listar_ventas,
+    listar_ventas_paciente,
+    listar_pendientes_cobranza,
+    registrar_abono_o_entrega,
+)
+from controllers.finanzas_controller import (
+    registrar_cierre_ruta,
+    listar_cierres_ruta,
+)

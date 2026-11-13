@@ -41,7 +41,8 @@ class Paciente:
             observaciones = row["observaciones"]
         )
 
-    def resumen_graduacion_(self):
+    @property
+    def resumen_graduacion(self):
         """Devuelve un formato detexto rapido con la graduacion clinica."""
         od = self.graduacion_od if self.graduacion_od else "N/A"
         oi = self.graduacion_oi if self.graduacion_oi else "N/A"

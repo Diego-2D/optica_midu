@@ -40,7 +40,7 @@ observaciones= ""):
 def listar_pacientes():
     """Obtiene todos los pacientes registrados convertidos a objetos Paciente."""
     filas = db_manager.obtener_pacientes()
-    return [Paciente.from_db_row(filas) for fila in filas]
+    return [Paciente.from_db_row(fila) for fila in filas]
 
 def listar_pacientes_por_localidad(localidad_id):
     """Obtiene los pacientes pertenecientes a una localidad especifica."""

@@ -221,3 +221,191 @@ def eliminar_paciente(paciente_id):
         cursor.execute(sql, (paciente_id,))
         conn.commit()
         return cursor.rowcount > 0
+
+# =====================================================================
+# GESTIÓN DE VENTAS Y COBRANZA
+# =====================================================================
+
+def crear_venta(
+    paciente_id,
+    tipo_lente,
+    tratamiento,
+    diseno_progresivo,
+    calidad_armazon,
+    total,
+    anticipo=0.0,
+    saldo_pendiente=0.0,
+    estatus_pago="Pendiente",
+    estatus_entrega="En Proceso",
+):
+    """Registra una nueva venta vinculada a un paciente."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO ventas (
+            paciente_id, tipo_lente, tratamiento, diseno_progresivo,
+            calidad_armazon, total, anticipo, saldo_pendiente,
+            estatus_pago, estatus_entrega
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            paciente_id,
+            tipo_lente,
+            tratamiento,
+            diseno_progresivo,
+            calidad_armazon,
+            total,
+            anticipo,
+            saldo_pendiente,
+            estatus_pago,
+            estatus_entrega,
+        ),
+    )
+    venta_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return venta_id
+
+
+def obtener_ventas():
+    """Obtiene todas las ventas registradas junto con el nombre del paciente."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT v.*, p.nombre AS paciente_nombre, p.telefono AS paciente_telefono
+        FROM ventas v
+        INNER JOIN pacientes p ON v.paciente_id = p.id
+        ORDER BY v.fecha_venta DESC
+        """
+    )
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
+
+
+def obtener_ventas_por_paciente(paciente_id):
+    """Obtiene el historial de ventas de un paciente específico."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT * FROM ventas
+        WHERE paciente_id = ?
+        ORDER BY fecha_venta DESC
+        """,
+        (paciente_id,),
+    )
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
+
+
+def obtener_ventas_pendientes():
+    """Obtiene las ventas con saldo pendiente o entrega en proceso."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT v.*, p.nombre AS paciente_nombre, p.telefono AS paciente_telefono
+        FROM ventas v
+        INNER JOIN pacientes p ON v.paciente_id = p.id
+        WHERE v.saldo_pendiente > 0 OR v.estatus_entrega != 'Entregado'
+        ORDER BY v.fecha_venta ASC
+        """
+    )
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
+
+
+def actualizar_pago_y_entrega(
+    venta_id, anticipo, saldo_pendiente, estatus_pago, estatus_entrega
+):
+    """Actualiza el abono, saldo restante y estatus de pago/entrega de una venta."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE ventas
+        SET anticipo = ?, saldo_pendiente = ?, estatus_pago = ?, estatus_entrega = ?
+        WHERE id = ?
+        """,
+        (anticipo, saldo_pendiente, estatus_pago, estatus_entrega, venta_id),
+    )
+    cambios = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return cambios > 0
+
+
+def eliminar_venta(venta_id):
+    """Elimina una venta por su ID."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM ventas WHERE id = ?", (venta_id,))
+    cambios = cursor.rowcount
+    conn.commit()
+    conn.close()
+    return cambios > 0
+
+
+# =====================================================================
+# GESTIÓN DE CIERRES DE RUTA (FINANZAS OPERATIVAS SIMPLES)
+# =====================================================================
+
+def crear_cierre_ruta(
+    localidad_id,
+    fecha,
+    total_venta=0.0,
+    gastos_viaticos=0.0,
+    gastos_materiales=0.0,
+    gastos_armazones=0.0,
+    gastos_maquilas=0.0,
+    gastos_accesorios=0.0,
+):
+    """Registra el cierre financiero simple de una ruta o fecha."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO cierres_ruta (
+            localidad_id, fecha, total_venta, gastos_viaticos,
+            gastos_materiales, gastos_armazones, gastos_maquilas, gastos_accesorios
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            localidad_id,
+            fecha,
+            total_venta,
+            gastos_viaticos,
+            gastos_materiales,
+            gastos_armazones,
+            gastos_maquilas,
+            gastos_accesorios,
+        ),
+    )
+    cierre_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return cierre_id
+
+
+def obtener_cierres_ruta():
+    """Obtiene todos los cierres de ruta ordenados por fecha más reciente."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT c.*, l.nombre AS localidad_nombre
+        FROM cierres_ruta c
+        LEFT JOIN localidades l ON c.localidad_id = l.id
+        ORDER BY c.fecha DESC, c.id DESC
+        """
+    )
+    filas = cursor.fetchall()
+    conn.close()
+    return filas
